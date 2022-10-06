@@ -1,6 +1,8 @@
+import { useValue } from "shared/modules/chroni";
+
 export class ctxMain {
-    aimDelta: number = 0;
-    aimOffset: number = 0
+    aimDelta = useValue(0);
+    aimOffset = useValue(0);
 
 
     constructor() {
