@@ -1,3 +1,3 @@
-import { makeHello } from "shared/module";
+import { ctxMain } from "shared/framework/ctxmain";
 
-print(makeHello("main.client.ts"));
+const mainCTX = new ctxMain()
