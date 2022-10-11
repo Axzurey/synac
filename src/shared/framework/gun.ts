@@ -1,9 +1,11 @@
+import { UserInputService } from "@rbxts/services";
 import { getCamera } from "shared/framework/exposed";
 import paths from "shared/globalPaths";
 import path from "shared/modules/path";
 import { animationCompiler } from "shared/modules/sweep";
 import utils from "shared/modules/utils";
 import { ctxMain } from "./ctxmain";
+import { keybinds } from "./keybinds";
 
 export type gunModel = Model & {
     aimpart: Part,
@@ -43,6 +45,14 @@ interface attachmentPayload {
     sight?: attachmentDescriptor
 }
 
+enum fireMode {
+	AUTO,
+	SEMI,
+	BURST2,
+	BURST3,
+	SHOTGUN
+}
+
 export class gun {
     firerate: number = 0;
 
@@ -51,13 +61,45 @@ export class gun {
     reserveAmmo: number = 210;
     reloadToChamber: boolean = true;
 
-    loadedAnimations: Partial<Record<animationTypes, AnimationTrack>> = {}
+    loadedAnimations: Partial<Record<animationTypes, AnimationTrack>> = {};
 
     viewmodel: gunViewModel;
 
     equipped: boolean = false;
 
-    constructor(private ctx: ctxMain, public payload: gunPayload) {
+	firemode: fireMode = fireMode.AUTO;
+
+	firemodes: fireMode[] = [fireMode.AUTO, fireMode.BURST3, fireMode.SEMI];
+
+	fireRates: Record<fireMode, number> = {
+		[fireMode.AUTO]: 600,
+		[fireMode.BURST2]: 600,
+		[fireMode.BURST3]: 600,
+		[fireMode.SEMI]: 600,
+		[fireMode.SHOTGUN]: 100
+	};
+
+	burstDelay: number = 9 / 60;
+
+	shotgunShells: number = 12;
+
+	mouseDownDebounce: boolean = false;
+
+	lastFired: number = tick();
+
+	cycleFireMode(): fireMode {
+		if (this.firemode === this.firemodes.size() - 1) {
+			return this.firemodes[0]
+		}
+		return this.firemodes.indexOf(this.firemode + 1);
+	}
+
+	getFireMode(): fireMode {
+		return this.firemode;
+	}
+
+    constructor(private ctx: ctxMain, private keybinds: keybinds, public payload: gunPayload) {
+
         let gun = path.sure(payload.pathToGun).Clone();
 
 		//get the viewmodel from path
@@ -126,10 +168,49 @@ export class gun {
 		this.viewmodel.Parent = undefined;
     }
 
+	fire() {
+		
+	}
+
     update(dt: number) {
         if (!this.equipped) return;
         const camera = getCamera();
 
         this.viewmodel.PivotTo(camera.CFrame);
+
+		let FMSEMISHOTGUN = (this.getFireMode() === fireMode.SEMI || this.getFireMode() === fireMode.SHOTGUN);
+
+		if (this.keybinds.getActionIsDown('fire')) {
+			if (FMSEMISHOTGUN) {
+				if (this.mouseDownDebounce === false) {
+					this.mouseDownDebounce = true;
+					this.keybinds.doKeyRaisedOnce('fire', () => this.mouseDownDebounce = false);
+				}
+			}
+
+			switch (this.getFireMode()) {
+				case fireMode.BURST2:
+					for (let i = 0; i < 2; i++) {
+						this.fire();
+						task.wait(this.burstDelay);
+					}
+					break;
+				case fireMode.BURST3:
+					for (let i = 0; i < 3; i++) {
+						this.fire();
+						task.wait(this.burstDelay);
+					}
+					break;
+				case fireMode.SHOTGUN:
+					for (let i = 0; i < this.shotgunShells; i++) {
+						this.fire();
+						task.wait(this.burstDelay);
+					}
+					break;
+				default:
+					this.fire();
+					break;
+			}
+		}
     }
 }

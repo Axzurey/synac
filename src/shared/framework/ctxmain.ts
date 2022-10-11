@@ -2,6 +2,7 @@ import { RunService } from "@rbxts/services";
 import { timeStepInterpolationMode, useValue } from "shared/modules/chroni";
 import { animateValue } from "shared/modules/colorful";
 import { gun } from "./gun";
+import { keybinds } from "./keybinds";
 
 export class ctxMain {
     aimDelta = useValue(0);
@@ -11,8 +12,14 @@ export class ctxMain {
         aiming: false,
     }
 
+    keybinds = new keybinds({
+        fire: Enum.UserInputType.MouseButton1,
+        firemode: Enum.KeyCode.V,
+        reload: Enum.KeyCode.R,
+    })
+
     loadout = {
-        primary: new gun(this, {pathToGun: 'ReplicatedStorage//guns//hk416', attachments: {}, animations: {
+        primary: new gun(this, this.keybinds, {pathToGun: 'ReplicatedStorage//guns//hk416', attachments: {}, animations: {
             idle: '',
             reload: '',
             reload_full: ''
