@@ -172,6 +172,16 @@ export class gun {
 		
 	}
 
+	unequip() {
+		this.viewmodel.Parent = undefined;
+		this.equipped = false;
+	}
+
+	equip() {
+		this.viewmodel.Parent = getCamera();
+		this.equipped = true;
+	}
+
     update(dt: number) {
         if (!this.equipped) return;
         const camera = getCamera();

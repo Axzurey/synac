@@ -32,8 +32,13 @@ export class ctxMain {
         return this.loadout[this.equipped];
     }
 
+    setEquippedItem(item: keyof typeof this.loadout) {
+        this.equipped = item;
+    }
+
     constructor() {
         RunService.RenderStepped.Connect(dt => this.update(dt));
+
     }
 
     toggleAim(t: boolean) {
