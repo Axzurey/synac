@@ -169,6 +169,17 @@ export class gun {
     }
 
 	fire() {
+		let cameraCFrame = getCamera().CFrame;
+
+		let spread = (1 - this.ctx.aimDelta.getValue()) * 30;
+
+		let origin = cameraCFrame.Position;
+		let direction = cameraCFrame.mul(CFrame.Angles(
+			math.rad(math.random(-spread, spread)),
+			math.rad(math.random(-spread, spread)),
+			0
+		)).LookVector;
+
 		
 	}
 

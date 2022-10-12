@@ -5,8 +5,8 @@ import { gun } from "./gun";
 import { keybinds } from "./keybinds";
 
 export class ctxMain {
-    aimDelta = useValue(0);
-    aimOffset = useValue(0);
+    aimDelta = useValue(0 as number);
+    aimOffset = useValue(0 as number);
 
     status = {
         aiming: false,
