@@ -1,5 +1,5 @@
-import { RunService } from "@rbxts/services";
-import { timeStepInterpolationMode, useValue } from "shared/modules/chroni";
+import { RunService, UserInputService } from "@rbxts/services";
+import { interpolateValue, timeStepInterpolationMode, useValue } from "shared/modules/chroni";
 import { animateValue } from "shared/modules/colorful";
 import { gun } from "./gun";
 import { keybinds } from "./keybinds";
@@ -16,13 +16,16 @@ export class ctxMain {
         fire: Enum.UserInputType.MouseButton1,
         firemode: Enum.KeyCode.V,
         reload: Enum.KeyCode.R,
+        aim: Enum.UserInputType.MouseButton2
     })
 
     loadout = {
-        primary: new gun(this, this.keybinds, {pathToGun: 'ReplicatedStorage//guns//hk416', attachments: {}, animations: {
-            idle: '',
-            reload: '',
-            reload_full: ''
+        primary: new gun(this, this.keybinds, {pathToGun: 'ReplicatedStorage//guns//hk416', attachments: {
+            sight: {
+                path: 'ReplicatedStorage//sights//holographic'
+            }
+        }, animations: {
+            idle: 'rbxassetid://11256660598',
         }})
     }
 
@@ -34,19 +37,30 @@ export class ctxMain {
 
     setEquippedItem(item: keyof typeof this.loadout) {
         this.equipped = item;
+        this.getEquippedItem().equip();
     }
 
     constructor() {
-        RunService.RenderStepped.Connect(dt => this.update(dt));
+        const renderConn = RunService.RenderStepped.Connect(dt => this.update(dt));
+        const keyDownConn = UserInputService.InputBegan.Connect((input, gp) => {
+            if (gp) return;
 
+            if (this.keybinds.checkIsAction('aim', input)) {
+                this.toggleAim(true);
+            }
+        })
+        const keyUpConn = UserInputService.InputEnded.Connect((input) => {
+
+            if (this.keybinds.checkIsAction('aim', input)) {
+                this.toggleAim(false);
+            }
+        })
+        this.setEquippedItem('primary');
     }
 
     toggleAim(t: boolean) {
         this.status.aiming = true;
-        animateValue(this.aimDelta, [
-            {time: 0, value: this.aimDelta.getValue(), interpolationMode: timeStepInterpolationMode.linear},
-            {time: 1 - (t ? this.aimDelta.getValue() : -this.aimDelta.getValue()), value:  t ? 1 : 0, interpolationMode: timeStepInterpolationMode.linear},
-        ])
+        interpolateValue(.25, t ? 1 : 0 as number, this.aimDelta, timeStepInterpolationMode.linear)
     }
 
     update(dt: number) {

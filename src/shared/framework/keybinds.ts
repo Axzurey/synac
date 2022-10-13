@@ -1,6 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 
-type keybinding = 'fire' | 'reload' | 'firemode'
+type keybinding = 'fire' | 'reload' | 'firemode' | 'aim'
 
 export class keybinds {
     constructor(private bindings: Record<keybinding, Enum.KeyCode | Enum.UserInputType>) {}
@@ -17,6 +17,20 @@ export class keybinds {
             if (UserInputService.IsMouseButtonPressed(bind)) return true;
         }
 
+        return false;
+    }
+    checkIsAction(action: keybinding, input: InputObject) {
+        if (!this.bindings[action]) return false;
+
+        let bind = this.bindings[action];
+
+        if (bind.IsA('KeyCode')) {
+            if (input.KeyCode === bind) return true;
+        }
+        else {
+            if (input.UserInputType === bind) return true;
+        }
+        
         return false;
     }
     doKeyRaisedOnce(key: keybinding, callback: () => void): void {

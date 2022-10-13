@@ -13,7 +13,10 @@ export type gunModel = Model & {
         exhaust: Attachment
     },
     mag: MeshPart,
-    sightNode: Part
+    sightNode: Part,
+	offsets: {
+		idle: CFrameValue
+	}
 }
 
 export type gunArms = Model & {
@@ -29,7 +32,7 @@ export type sightModel = Model & {
 
 export type gunViewModel = gunArms & gunModel
 
-type animationTypes = 'reload' | 'reload_full' | 'idle'
+type animationTypes = 'idle' //'reload' | 'reload_full' | 
 
 interface gunPayload {
     pathToGun: string,
@@ -197,7 +200,11 @@ export class gun {
         if (!this.equipped) return;
         const camera = getCamera();
 
-        this.viewmodel.PivotTo(camera.CFrame);
+		let viewmodelOffset = camera.CFrame.mul(new CFrame(0, 0, -.1)
+		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()));
+
+        this.viewmodel.PivotTo(viewmodelOffset);
+
 
 		let FMSEMISHOTGUN = (this.getFireMode() === fireMode.SEMI || this.getFireMode() === fireMode.SHOTGUN);
 
@@ -232,6 +239,10 @@ export class gun {
 					this.fire();
 					break;
 			}
+		}
+
+		if (this.loadedAnimations['idle'] && !this.loadedAnimations['idle'].IsPlaying) {
+			this.loadedAnimations['idle'].Play();
 		}
     }
 }
