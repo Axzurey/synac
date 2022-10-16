@@ -3,7 +3,8 @@ import { getCamera } from "shared/framework/exposed";
 import paths from "shared/globalPaths";
 import path from "shared/modules/path";
 import { animationCompiler } from "shared/modules/sweep";
-import utils from "shared/modules/utils";
+import utils, { later, tableUtils } from "shared/modules/utils";
+import spring from "shared/physics/spring";
 import { ctxMain } from "./ctxmain";
 import { keybinds } from "./keybinds";
 
@@ -90,6 +91,14 @@ export class gun {
 
 	lastFired: number = tick();
 
+	recoilSpring = spring.create(5, 75, 3, 4);
+
+	recoilIndex: number = 0;
+
+	recoilPattern: Map<NumberRange, [Vector3, Vector3]> = new Map();
+
+	recoilRegroupTime: number = 1;
+
 	cycleFireMode(): fireMode {
 		if (this.firemode === this.firemodes.size() - 1) {
 			return this.firemodes[0]
@@ -172,6 +181,8 @@ export class gun {
     }
 
 	fire() {
+		let random = new Random();
+
 		let cameraCFrame = getCamera().CFrame;
 
 		let spread = (1 - this.ctx.aimDelta.getValue()) * 30;
@@ -183,7 +194,27 @@ export class gun {
 			0
 		)).LookVector;
 
-		
+		let t = tick();
+		this.lastFired = t;
+
+		this.recoilIndex ++;
+
+		later(this.recoilRegroupTime, () => {
+			if (this.lastFired !== t) return;
+			this.recoilIndex --;
+		});
+
+		let max = tableUtils.rangeUpperClamp(this.recoilPattern)!
+
+		let recoilIndex = this.recoilIndex >= max ? max: this.recoilIndex;
+
+		let add = tableUtils.firstNumberRangeContainingNumber(this.recoilPattern, recoilIndex)!;
+
+		let pickX = random.NextNumber(math.min(add[0].X, add[1].X), math.max(add[0].X, add[1].X)) * 1;
+		let pickY = random.NextNumber(math.min(add[0].Y, add[1].Y), math.max(add[0].Y, add[1].Y)) * 1;
+		let pickZ = random.NextNumber(math.min(add[0].Z, add[1].Z), math.max(add[0].Z, add[1].Z)) / 2;
+
+		this.recoilSpring.shove(new Vector3(-pickX, pickY, pickZ));
 	}
 
 	unequip() {
@@ -199,12 +230,14 @@ export class gun {
     update(dt: number) {
         if (!this.equipped) return;
         const camera = getCamera();
+		
+		let recoil = this.recoilSpring.update(dt);
 
 		let viewmodelOffset = camera.CFrame.mul(new CFrame(0, 0, -.1)
-		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()));
+		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()))
+		.mul(new CFrame(0, 0, recoil.Z))
 
         this.viewmodel.PivotTo(viewmodelOffset);
-
 
 		let FMSEMISHOTGUN = (this.getFireMode() === fireMode.SEMI || this.getFireMode() === fireMode.SHOTGUN);
 

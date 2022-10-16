@@ -1,6 +1,7 @@
 import { RunService, UserInputService } from "@rbxts/services";
 import { interpolateValue, timeStepInterpolationMode, useValue } from "shared/modules/chroni";
 import { animateValue } from "shared/modules/colorful";
+import spring from "shared/physics/spring";
 import { gun } from "./gun";
 import { keybinds } from "./keybinds";
 
@@ -39,7 +40,7 @@ export class ctxMain {
         this.equipped = item;
         this.getEquippedItem().equip();
     }
-
+    
     constructor() {
         const renderConn = RunService.RenderStepped.Connect(dt => this.update(dt));
         const keyDownConn = UserInputService.InputBegan.Connect((input, gp) => {
@@ -60,7 +61,7 @@ export class ctxMain {
 
     toggleAim(t: boolean) {
         this.status.aiming = true;
-        interpolateValue(.25, t ? 1 : 0 as number, this.aimDelta, timeStepInterpolationMode.linear)
+        interpolateValue(.25, t ? 1 : 0 as number, this.aimDelta, timeStepInterpolationMode.quadOut)
     }
 
     update(dt: number) {
@@ -68,7 +69,5 @@ export class ctxMain {
         if (!item) return;
         
         item.update(dt);
-
-        
     }
 }
