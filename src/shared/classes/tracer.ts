@@ -1,4 +1,4 @@
-import { RunService } from "@rbxts/services";
+import { RunService, Workspace } from "@rbxts/services";
 
 interface tracerData {
     color: Color3,
@@ -7,6 +7,16 @@ interface tracerData {
     width: number,
     speed: number,
 }
+
+const tracerParent = new Instance("Part");
+tracerParent.Anchored = true;
+tracerParent.Transparency = 1;
+tracerParent.CanCollide = false;
+tracerParent.CanQuery = false;
+tracerParent.CanTouch = false;
+tracerParent.Position = new Vector3(0, -1000, 0);
+tracerParent.Name = 'tracer_bin c:'
+tracerParent.Parent = Workspace;
 
 export class tracer {
     position: Vector3;
@@ -22,12 +32,14 @@ export class tracer {
         beam.Parent = trace;
 
         this.tracerAttachment = trace as typeof this.tracerAttachment;
+        this.tracerAttachment.Parent = tracerParent;
     }
     destroy() {
         tracerPool.remove(tracerPool.indexOf(this));
     }
     update(dt: number) {
         let targetP = this.position.add(this.data.direction.mul(dt).mul(this.data.speed));
+        this.tracerAttachment.Position = targetP;
     }
 }
 

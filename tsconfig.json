@@ -2,6 +2,7 @@
 	"compilerOptions": {
 		// required
 		"allowSyntheticDefaultImports": true,
+		"moduleDetection": "force",
 		"downlevelIteration": true,
 		"jsx": "react",
 		"jsxFactory": "Roact.createElement",
