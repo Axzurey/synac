@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@rbxts/compiler-types": "^1.2.8-types.1",
+    "@rbxts/compiler-types": "^2.0.4-types.0",
     "@rbxts/types": "^1.0.642",
     "typescript": "^4.8.4"
   },
