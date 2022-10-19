@@ -95,7 +95,15 @@ export class gun {
 
 	recoilIndex: number = 0;
 
-	recoilPattern: Map<NumberRange, [Vector3, Vector3]> = new Map();
+	recoilPattern: Map<NumberRange, [Vector3, Vector3]> = tableUtils.toMap([
+        new NumberRange(0, 10),
+        new NumberRange(10, 20),
+        new NumberRange(20, 31)
+    ], [
+        [new Vector3(.2, .3, .2), new Vector3(.7, 1, .2)],
+        [new Vector3(.2, .7, .3), new Vector3(.6, .8, .3)],
+        [new Vector3(.7, .9, .2), new Vector3(.5, .5, .4)]
+    ]);
 
 	recoilRegroupTime: number = 1;
 
@@ -235,13 +243,16 @@ export class gun {
 
 		let viewmodelOffset = camera.CFrame.mul(new CFrame(0, 0, -.1)
 		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()))
+		.mul(this.ctx.cameraLeanOffset.getValue())
+		.mul(this.ctx.leanOffset.getValue())
 		.mul(new CFrame(0, 0, recoil.Z))
 
         this.viewmodel.PivotTo(viewmodelOffset);
 
 		let FMSEMISHOTGUN = (this.getFireMode() === fireMode.SEMI || this.getFireMode() === fireMode.SHOTGUN);
 
-		if (this.keybinds.getActionIsDown('fire')) {
+		if (this.keybinds.getActionIsDown('fire') && tick() - this.lastFired > 60 / this.fireRates[this.getFireMode()]) {
+			this.lastFired = tick();
 			if (FMSEMISHOTGUN) {
 				if (this.mouseDownDebounce === false) {
 					this.mouseDownDebounce = true;

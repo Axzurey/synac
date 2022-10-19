@@ -30,7 +30,10 @@ namespace serenity {
         'BrickColor': (b: BrickColor) => ['BrickColor', b.Name],
         'UDim': (u: UDim) => ['UDim', u.Scale, u.Offset],
         'UDim2': (u: UDim2) => ['UDim2', u.X.Scale, u.X.Offset, u.Y.Scale, u.Y.Offset],
-        'CFrame': (cf: CFrame) => ['CFrame', ...cf.GetComponents() as [number, number, number, number, number, number, number, number, number, number, number, number]],
+        'CFrame': (cf: CFrame) => {
+            let components = cf.GetComponents();
+            return ['CFrame', ...(components as [number, number, number, number, number, number, number, number, number, number, number, number])]
+        },
         'Vector3': (v3: Vector3) => ['Vector3', v3.X, v3.Y, v3.Z],
         'Vector2': (v2: Vector2) => ['Vector2', v2.X, v2.Y],
         'Color3': (c3: Color3) => ['Color3', c3.R, c3.G, c3.B],

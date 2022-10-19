@@ -1,6 +1,6 @@
 import { UserInputService } from "@rbxts/services";
 
-type keybinding = 'fire' | 'reload' | 'firemode' | 'aim'
+type keybinding = 'fire' | 'reload' | 'firemode' | 'aim' | 'leanLeft' | 'leanRight'
 
 export class keybinds {
     constructor(private bindings: Record<keybinding, Enum.KeyCode | Enum.UserInputType>) {}
