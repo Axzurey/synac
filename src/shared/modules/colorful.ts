@@ -1,9 +1,10 @@
 import { RunService } from "@rbxts/services";
-import { calculateValueForInterpolation, interpolableTypes, interpolations, timeStepInterpolationMode, valueRef } from "./chroni";
+import { getInterpolation, interpolableTypes, valueRef } from "./chroni";
 
 interface colorfulKeyframe<T extends interpolableTypes> {
     time: number,
-    interpolationMode: timeStepInterpolationMode,
+    interpolationMode: Enum.EasingStyle,
+    interpolationDirection: Enum.EasingDirection,
     value: T
 }
 
@@ -80,15 +81,7 @@ RunService.Heartbeat.Connect((dt) => {
             return;
         }
 
-        let interp = interpolations[currentKeyframe.interpolationMode];
-
-        let t = v.timeElapsed - currentKeyframe.time;
-
-        let b = currentKeyframe.value as number;
-        let c = nextKeyframe.value as number - b;
-        let d = nextKeyframe.time - currentKeyframe.time;
-
-        let out = calculateValueForInterpolation(t, nextKeyframe.time - currentKeyframe.time, currentKeyframe.value, nextKeyframe.value, currentKeyframe.interpolationMode)
+        let out = getInterpolation(currentKeyframe.value, nextKeyframe.value, currentKeyframe.time, nextKeyframe.time, v.timeElapsed + currentKeyframe.time, currentKeyframe.interpolationMode, currentKeyframe.interpolationDirection)
 
         v.ref.setValue(out);
     })

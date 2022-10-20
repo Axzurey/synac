@@ -1,5 +1,5 @@
 import { RunService, UserInputService } from "@rbxts/services";
-import { interpolateValue, timeStepInterpolationMode, useValue } from "shared/modules/chroni";
+import { interpolateValue, useValue } from "shared/modules/chroni";
 import { animateValue } from "shared/modules/colorful";
 import spring from "shared/physics/spring";
 import { getCamera } from "./exposed";
@@ -8,13 +8,14 @@ import { keybinds } from "./keybinds";
 
 export class ctxMain {
     aimDelta = useValue(0 as number);
-    aimOffset = useValue(0 as number);
     cameraLeanOffset = useValue(new CFrame());
     leanOffset = useValue(new CFrame());
+    stanceOffset = useValue(new CFrame());
 
     status = {
         aiming: false,
-        leanDirection: 0 as 1 | 0 | -1
+        leanDirection: 0 as 1 | 0 | -1,
+        stance: 0 as 1 | 0 | -1
     }
 
     staticOffsets = {
@@ -22,6 +23,8 @@ export class ctxMain {
 		leanLeft: CFrame.fromEulerAnglesYXZ(0, 0, math.rad(16)),
 		leanRightCamera: new CFrame(1, 0, 0).mul(CFrame.fromEulerAnglesYXZ(0, 0, math.rad(-5))),
 		leanLeftCamera: new CFrame(-1, 0, 0).mul(CFrame.fromEulerAnglesYXZ(0, 0, math.rad(5))),
+        stanceCrouch: new CFrame(0, -1, 0),
+        stanceProne: new CFrame(0, -2, 0)
     }
 
     keybinds = new keybinds({
@@ -84,7 +87,11 @@ export class ctxMain {
 
     toggleAim(t: boolean) {
         this.status.aiming = true;
-        interpolateValue(.25, t ? 1 : 0 as number, this.aimDelta, timeStepInterpolationMode.quadOut)
+        interpolateValue(.25, t ? 1 : 0 as number, this.aimDelta);
+    }
+
+    toggleStance(d: 1 | 0 | -1) {
+
     }
 
     toggleLean(d: 1 | 0 | -1) {
@@ -106,8 +113,8 @@ export class ctxMain {
 
         this.status.leanDirection = d;
 
-        interpolateValue(.35, cameraLeanOffset, this.cameraLeanOffset, timeStepInterpolationMode.linear);
-        interpolateValue(.35, leanOffset, this.leanOffset, timeStepInterpolationMode.linear);
+        interpolateValue(.2, cameraLeanOffset, this.cameraLeanOffset);
+        interpolateValue(.2, leanOffset, this.leanOffset);
     }
 
     update(dt: number) {
