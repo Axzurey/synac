@@ -1,6 +1,19 @@
 import { UserInputService } from "@rbxts/services";
+import {t} from '@rbxts/t';
 
 namespace utils {
+
+    export function verifyRemoteArgs(args: unknown[], verify: t.check<any>[]) {
+        let i = 0;
+        for (let value of verify) {
+            let against = args[i];
+            if (!value(against)) {
+                return false;
+            }
+            i ++;
+        }
+        return true;
+    }
 
     export function propertyExistsInObject<c extends any, p extends string, propType>(classlike: c, property: p): classlike is c & propertyExists<p, propType> {
         if (classlike[property as unknown as keyof typeof classlike]) return true;

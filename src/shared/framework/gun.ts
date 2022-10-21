@@ -1,4 +1,5 @@
 import { UserInputService } from "@rbxts/services";
+import { tracer } from "shared/classes/tracer";
 import { getCamera } from "shared/framework/exposed";
 import paths from "shared/globalPaths";
 import path from "shared/modules/path";
@@ -11,7 +12,7 @@ import { keybinds } from "./keybinds";
 export type gunModel = Model & {
     aimpart: Part,
     barrel: MeshPart & {
-        exhaust: Attachment
+        muzzle: Attachment
     },
     mag: MeshPart,
     sightNode: Part,
@@ -223,7 +224,11 @@ export class gun {
 		let pickZ = random.NextNumber(math.min(add[0].Z, add[1].Z), math.max(add[0].Z, add[1].Z)) / 2;
 
 		this.recoilSpring.shove(new Vector3(0, 0, pickZ));
-		this.ctx.cameraRecoil.shove(new Vector3(pickX, -pickY, 0))
+		this.ctx.cameraRecoil.shove(new Vector3(pickX, -pickY, 0));
+
+		let mp = this.viewmodel.barrel.muzzle.Position.add(cameraCFrame.LookVector.mul(10))
+		
+		let trace = new tracer(mp, direction, 99, new Color3(0, 1, 1));
 	}
 
 	unequip() {

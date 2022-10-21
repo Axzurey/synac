@@ -1,0 +1,1 @@
+viewmodel falls infinitely, causing inaccurate measurements of component positions.
