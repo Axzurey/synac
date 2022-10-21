@@ -12,10 +12,12 @@ export class ctxMain {
     leanOffset = useValue(new CFrame());
     stanceOffset = useValue(new CFrame());
 
+    cameraRecoil = spring.create(5, 75, 3, 4)
+
     status = {
         aiming: false,
         leanDirection: 0 as 1 | 0 | -1,
-        stance: 0 as 1 | 0 | -1
+        stance: 1 as 1 | 0 | -1
     }
 
     staticOffsets = {
@@ -34,6 +36,8 @@ export class ctxMain {
         aim: Enum.UserInputType.MouseButton2,
         leanLeft: Enum.KeyCode.Q,
         leanRight: Enum.KeyCode.E,
+        crouch: Enum.KeyCode.C,
+        prone: Enum.KeyCode.LeftControl
     })
 
     loadout = {
@@ -72,6 +76,12 @@ export class ctxMain {
             if (this.keybinds.checkIsAction('leanRight', input)) {
                 this.toggleLean(1)
             }
+            if (this.keybinds.checkIsAction('crouch', input)) {
+                this.toggleStance(0)
+            }
+            if (this.keybinds.checkIsAction('prone', input)) {
+                this.toggleStance(-1)
+            }
         })
 
         const keyUpConn = UserInputService.InputEnded.Connect((input) => {
@@ -91,7 +101,30 @@ export class ctxMain {
     }
 
     toggleStance(d: 1 | 0 | -1) {
+        let prev = this.status.stance;
+        if (d === this.status.stance) d = 1;
 
+        let stanceOffset = new CFrame();
+
+        if (d === 0) {
+            stanceOffset = this.staticOffsets.stanceCrouch;
+        }
+        else if (d === -1) {
+            stanceOffset = this.staticOffsets.stanceProne;
+        }
+
+        this.status.stance = d;
+
+        let intTime = .25;
+
+        if (prev === -1) {
+            intTime = .75;
+        }
+        if (d === -1) {
+            intTime = .75;
+        }
+
+        interpolateValue(intTime, stanceOffset, this.stanceOffset);
     }
 
     toggleLean(d: 1 | 0 | -1) {
@@ -100,13 +133,11 @@ export class ctxMain {
         let leanOffset = new CFrame();
         let cameraLeanOffset = new CFrame();
 
-        print(d)
-
         if (d === 1) {
             leanOffset = this.staticOffsets.leanRight;
             cameraLeanOffset = this.staticOffsets.leanRightCamera;
         }
-        if (d === -1) {
+        else if (d === -1) {
             leanOffset = this.staticOffsets.leanLeft;
             cameraLeanOffset = this.staticOffsets.leanLeftCamera;
         }
@@ -125,7 +156,11 @@ export class ctxMain {
 
         const camera = getCamera();
 
+        const cameraRecoil = this.cameraRecoil.update(dt);
+
         camera.CFrame = camera.CFrame
+        .mul(this.stanceOffset.getValue())
         .mul(this.cameraLeanOffset.getValue())
+        .mul(CFrame.Angles(cameraRecoil.X, cameraRecoil.Y, 0))
     }
 }

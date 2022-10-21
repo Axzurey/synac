@@ -91,7 +91,7 @@ export class gun {
 
 	lastFired: number = tick();
 
-	recoilSpring = spring.create(5, 75, 3, 4);
+	recoilSpring = spring.create(5, 85, 3, 10);
 
 	recoilIndex: number = 0;
 
@@ -218,11 +218,12 @@ export class gun {
 
 		let add = tableUtils.firstNumberRangeContainingNumber(this.recoilPattern, recoilIndex)!;
 
-		let pickX = random.NextNumber(math.min(add[0].X, add[1].X), math.max(add[0].X, add[1].X)) * 1;
-		let pickY = random.NextNumber(math.min(add[0].Y, add[1].Y), math.max(add[0].Y, add[1].Y)) * 1;
+		let pickX = random.NextNumber(math.min(add[0].X, add[1].X), math.max(add[0].X, add[1].X)) / 15;
+		let pickY = random.NextNumber(math.min(add[0].Y, add[1].Y), math.max(add[0].Y, add[1].Y)) / 15;
 		let pickZ = random.NextNumber(math.min(add[0].Z, add[1].Z), math.max(add[0].Z, add[1].Z)) / 2;
 
-		this.recoilSpring.shove(new Vector3(-pickX, pickY, pickZ));
+		this.recoilSpring.shove(new Vector3(0, 0, pickZ));
+		this.ctx.cameraRecoil.shove(new Vector3(pickX, -pickY, 0))
 	}
 
 	unequip() {
@@ -243,6 +244,7 @@ export class gun {
 
 		let viewmodelOffset = camera.CFrame.mul(new CFrame(0, 0, -.1)
 		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()))
+		.mul(this.ctx.stanceOffset.getValue())
 		.mul(this.ctx.cameraLeanOffset.getValue())
 		.mul(this.ctx.leanOffset.getValue())
 		.mul(new CFrame(0, 0, recoil.Z))
