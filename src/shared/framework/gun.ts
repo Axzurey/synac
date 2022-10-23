@@ -1,6 +1,7 @@
 import { UserInputService } from "@rbxts/services";
 import { tracer } from "shared/classes/tracer";
-import { getCamera } from "shared/framework/exposed";
+import { getCamera, getCharacter } from "shared/framework/exposed";
+import system from "shared/game/system";
 import paths from "shared/globalPaths";
 import path from "shared/modules/path";
 import { animationCompiler } from "shared/modules/sweep";
@@ -8,6 +9,7 @@ import utils, { later, tableUtils } from "shared/modules/utils";
 import spring from "shared/physics/spring";
 import { ctxMain } from "./ctxmain";
 import { keybinds } from "./keybinds";
+import { viewBob } from "./view";
 
 export type gunModel = Model & {
     aimpart: Part,
@@ -92,7 +94,10 @@ export class gun {
 
 	lastFired: number = tick();
 
-	recoilSpring = spring.create(5, 85, 3, 10);
+	springs = {
+		sway: spring.create(),
+		recoil: spring.create(5, 85, 3, 10)
+	}
 
 	recoilIndex: number = 0;
 
@@ -194,7 +199,7 @@ export class gun {
 
 		let cameraCFrame = getCamera().CFrame;
 
-		let spread = (1 - this.ctx.aimDelta.getValue()) * 30;
+		let spread = (1 - this.ctx.aimDelta.getValue()) * 5;
 
 		let origin = cameraCFrame.Position;
 		let direction = cameraCFrame.mul(CFrame.Angles(
@@ -223,12 +228,14 @@ export class gun {
 		let pickY = random.NextNumber(math.min(add[0].Y, add[1].Y), math.max(add[0].Y, add[1].Y)) / 15;
 		let pickZ = random.NextNumber(math.min(add[0].Z, add[1].Z), math.max(add[0].Z, add[1].Z)) / 2;
 
-		this.recoilSpring.shove(new Vector3(0, 0, pickZ));
+		this.springs.recoil.shove(new Vector3(0, 0, pickZ));
 		this.ctx.cameraRecoil.shove(new Vector3(pickX, -pickY, 0));
 
-		let mp = this.viewmodel.barrel.muzzle.Position.add(cameraCFrame.LookVector.mul(10))
-		
-		let trace = new tracer(mp, direction, 99, new Color3(0, 1, 1));
+		let mp = this.viewmodel.barrel.muzzle.WorldPosition.add(cameraCFrame.LookVector.mul(3))
+
+		let trace = new tracer(mp, direction, 2, Color3.fromRGB(82, 33, 5));
+
+		system.client.invokeProtocol('fireBullet', CFrame.lookAt(origin, origin.add(direction)))
 	}
 
 	unequip() {
@@ -244,15 +251,29 @@ export class gun {
     update(dt: number) {
         if (!this.equipped) return;
         const camera = getCamera();
+
+		const character = getCharacter()!;
 		
-		let recoil = this.recoilSpring.update(dt);
+		let recoil = this.springs.recoil.update(dt);
+
+		this.viewmodel.aimpart.Anchored = true;
+
+		const velocity = character.HumanoidRootPart.AssemblyLinearVelocity;
+
+		let walkswaySub = new Vector3(viewBob(10, .1), viewBob(5, .1), viewBob(5, .1));
+        this.springs.sway.shove(walkswaySub.div(25).mul(dt * 60 * velocity.Magnitude));
+
+		print(walkswaySub.div(25).mul(dt * 60 * velocity.Magnitude))//madman springs!
+
+        let walkSway = this.springs.sway.update(dt);
 
 		let viewmodelOffset = camera.CFrame.mul(new CFrame(0, 0, -.1)
 		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()))
 		.mul(this.ctx.stanceOffset.getValue())
+		.mul(CFrame.Angles(0, walkSway.Y, walkSway.X))
 		.mul(this.ctx.cameraLeanOffset.getValue())
-		.mul(this.ctx.leanOffset.getValue())
 		.mul(new CFrame(0, 0, recoil.Z))
+		.mul(this.ctx.leanOffset.getValue())
 
         this.viewmodel.PivotTo(viewmodelOffset);
 

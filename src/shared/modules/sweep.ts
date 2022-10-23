@@ -25,3 +25,25 @@ export class animationCompiler {
         this.animation.Destroy();
     }
 }
+
+export class Debounce {
+    private lastBounce: number = 0;
+    constructor(private dbLength: number) {
+
+    }
+    pass(ignoreAndSet: boolean = false) {
+        if (ignoreAndSet) {
+            this.lastBounce = tick();
+            return true;
+        }
+        if (tick() - this.lastBounce < this.dbLength) return false;
+        
+        this.lastBounce = tick();
+
+        return true;
+    }
+}
+
+export function createDebounce(bounceLength: number) {
+    return new Debounce(bounceLength);
+}

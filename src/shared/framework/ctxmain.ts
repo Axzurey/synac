@@ -1,10 +1,12 @@
 import { RunService, UserInputService } from "@rbxts/services";
 import { interpolateValue, useValue } from "shared/modules/chroni";
 import { animateValue } from "shared/modules/colorful";
+import { createDebounce } from "shared/modules/sweep";
 import spring from "shared/physics/spring";
-import { getCamera } from "./exposed";
+import { getCamera, getCharacter } from "./exposed";
 import { gun } from "./gun";
 import { keybinds } from "./keybinds";
+import { viewBob } from "./view";
 
 export class ctxMain {
     aimDelta = useValue(0 as number);
@@ -12,7 +14,17 @@ export class ctxMain {
     leanOffset = useValue(new CFrame());
     stanceOffset = useValue(new CFrame());
 
-    cameraRecoil = spring.create(5, 75, 3, 4)
+    springs = {
+        
+    }
+
+    cameraRecoil = spring.create(5, 75, 3, 4);
+
+    debounces = {
+        stance: createDebounce(.1),
+        ads: createDebounce(.05),
+        lean: createDebounce(.1),
+    }
 
     status = {
         aiming: false,
@@ -95,12 +107,14 @@ export class ctxMain {
         this.setEquippedItem('primary');
     }
 
-    toggleAim(t: boolean) {
-        this.status.aiming = true;
+    toggleAim(t: boolean, override: boolean = false) {
+        this.debounces.ads.pass(override);
+        this.status.aiming = t;
         interpolateValue(.25, t ? 1 : 0 as number, this.aimDelta);
     }
 
-    toggleStance(d: 1 | 0 | -1) {
+    toggleStance(d: 1 | 0 | -1, override: boolean = false) {
+        this.debounces.stance.pass(override);
         let prev = this.status.stance;
         if (d === this.status.stance) d = 1;
 
@@ -127,7 +141,8 @@ export class ctxMain {
         interpolateValue(intTime, stanceOffset, this.stanceOffset);
     }
 
-    toggleLean(d: 1 | 0 | -1) {
+    toggleLean(d: 1 | 0 | -1, override: boolean = false) {
+        this.debounces.lean.pass(override);
         if (d === this.status.leanDirection) d = 0;
 
         let leanOffset = new CFrame();
@@ -149,8 +164,10 @@ export class ctxMain {
     }
 
     update(dt: number) {
-        let item = this.getEquippedItem();
-        if (!item) return;
+        const item = this.getEquippedItem();
+        const character = getCharacter();
+
+        if (!item || !character) return;
         
         item.update(dt);
 
@@ -160,7 +177,7 @@ export class ctxMain {
 
         camera.CFrame = camera.CFrame
         .mul(this.stanceOffset.getValue())
-        .mul(this.cameraLeanOffset.getValue())
         .mul(CFrame.Angles(cameraRecoil.X, cameraRecoil.Y, 0))
+        .mul(this.cameraLeanOffset.getValue())
     }
 }

@@ -26,7 +26,7 @@ export class tracer {
         let b = new Instance('Trail');
         b.Brightness = 100;
         b.Color = new ColorSequence(color);
-        b.Lifetime = 1;
+        b.Lifetime = .1;
         b.LightInfluence = 0;
         b.FaceCamera = true;
         b.WidthScale = new NumberSequence(.01);
