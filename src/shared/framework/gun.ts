@@ -95,8 +95,8 @@ export class gun {
 	lastFired: number = tick();
 
 	springs = {
-		sway: spring.create(),
-		recoil: spring.create(5, 85, 3, 10)
+		recoil: spring.create(5, 85, 3, 10),
+		walkSway: new Vector3()
 	}
 
 	recoilIndex: number = 0;
@@ -208,6 +208,8 @@ export class gun {
 			0
 		)).LookVector;
 
+		print(direction, cameraCFrame.LookVector)
+
 		let t = tick();
 		this.lastFired = t;
 
@@ -235,7 +237,7 @@ export class gun {
 
 		let trace = new tracer(mp, direction, 2, Color3.fromRGB(82, 33, 5));
 
-		system.client.invokeProtocol('fireBullet', CFrame.lookAt(origin, origin.add(direction)))
+		system.client.invokeProtocol('fireBullet', origin, direction)
 	}
 
 	unequip() {
@@ -260,17 +262,15 @@ export class gun {
 
 		const velocity = character.HumanoidRootPart.AssemblyLinearVelocity;
 
-		let walkswaySub = new Vector3(viewBob(10, .1), viewBob(5, .1), viewBob(5, .1));
-        this.springs.sway.shove(walkswaySub.div(25).mul(dt * 60 * velocity.Magnitude));
+		this.springs.walkSway = this.springs.walkSway
+		.Lerp(new Vector3(viewBob(10, .01), viewBob(5, .01), viewBob(5, .01)).mul(velocity.Magnitude * (1 - this.ctx.aimDelta.getValue())), .1);
 
-		print(walkswaySub.div(25).mul(dt * 60 * velocity.Magnitude))//madman springs!
-
-        let walkSway = this.springs.sway.update(dt);
+		const walkSway = this.springs.walkSway;
 
 		let viewmodelOffset = camera.CFrame.mul(new CFrame(0, 0, -.1)
 		.Lerp(this.viewmodel.offsets.idle.Value, 1 - this.ctx.aimDelta.getValue()))
 		.mul(this.ctx.stanceOffset.getValue())
-		.mul(CFrame.Angles(0, walkSway.Y, walkSway.X))
+		.mul(new CFrame(walkSway.X / 10, walkSway.Y / 10, 0))
 		.mul(this.ctx.cameraLeanOffset.getValue())
 		.mul(new CFrame(0, 0, recoil.Z))
 		.mul(this.ctx.leanOffset.getValue())

@@ -12,9 +12,7 @@ export class serverGun {
     constructor(private ctx: ctxServer, public client: Player) {
 
     }
-    fire(at: CFrame) {
-        let position = at.Position;
-        let direction = at.LookVector;
+    fire(position: Vector3, direction: Vector3) {
 
         let result = nylon.queryRaycast({
             origin: position,

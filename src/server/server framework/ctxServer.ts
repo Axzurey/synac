@@ -17,8 +17,8 @@ export class ctxServer {
         
         const playerStuff: {[k: number]: serverGun} = {}
         
-        system.server.on('fireBullet', (player, at) => {
-            playerStuff[player.UserId].fire(at)
+        system.server.on('fireBullet', (player, at, to) => {
+            playerStuff[player.UserId].fire(at, to)
         })
         
         Players.PlayerAdded.Connect((p) => {

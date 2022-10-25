@@ -3,8 +3,8 @@ import remoteProtocol from "shared/modules/remoteProtocol";
 
 const protocols = {
     fireBullet: {
-        protocol: new remoteProtocol<(player: Player, at: CFrame) => void, (at: CFrame) => void>
-        ('fire_bullet', [t.instanceOf('Player'), t.CFrame])
+        protocol: new remoteProtocol<(player: Player, at: Vector3, to: Vector3) => void, (at: Vector3, to: Vector3) => void>
+        ('fire_bullet', [t.instanceOf('Player'), t.Vector3, t.Vector3])
     }
 }
 

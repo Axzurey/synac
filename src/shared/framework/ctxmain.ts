@@ -164,10 +164,13 @@ export class ctxMain {
     }
 
     update(dt: number) {
+        UserInputService.MouseIconEnabled = false;
         const item = this.getEquippedItem();
         const character = getCharacter();
 
         if (!item || !character) return;
+
+        TODO: BULLETS DONT GO RIGHT WAY
         
         item.update(dt);
 
