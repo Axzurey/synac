@@ -169,8 +169,6 @@ export class ctxMain {
         const character = getCharacter();
 
         if (!item || !character) return;
-
-        TODO: BULLETS DONT GO RIGHT WAY
         
         item.update(dt);
 

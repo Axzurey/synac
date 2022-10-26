@@ -14,6 +14,8 @@ export class serverGun {
     }
     fire(position: Vector3, direction: Vector3) {
 
+        lin
+
         let result = nylon.queryRaycast({
             origin: position,
             direction: direction,

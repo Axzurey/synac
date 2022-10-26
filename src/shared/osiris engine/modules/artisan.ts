@@ -1,4 +1,4 @@
-export namespace Raylibclasses {
+export namespace ArtisanClasses {
     let geowedge = new Instance("WedgePart");
     geowedge.Anchored = true;
     geowedge.TopSurface = Enum.SurfaceType.Smooth;
@@ -105,11 +105,11 @@ export namespace Raylibclasses {
     }
 }
 
-export namespace Raylib {
+export namespace Artisan {
     export function DrawTri(a: Vector3, b: Vector3, c: Vector3, width0?: number, width1?: number, properties?: Map<Partial<keyof WritableInstanceProperties<WedgePart>>, any>): Raylibclasses.triangle {
-        return new Raylibclasses.triangle(a, b, c, width0, width1, properties);
+        return new ArtisanClasses.triangle(a, b, c, width0, width1, properties);
     }
     export function DrawLine(a: Vector3, b: Vector3, width0?: number, width1?: number, properties?: Map<Partial<keyof WritableInstanceProperties<Part>>, any>): Raylibclasses.line {
-        return new Raylibclasses.line(a, b, width0, width1, properties);
+        return new ArtisanClasses.line(a, b, width0, width1, properties);
     }
 }

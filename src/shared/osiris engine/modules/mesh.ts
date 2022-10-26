@@ -1,5 +1,5 @@
 import { Workspace } from "@rbxts/services";
-import { Raylib } from "./raylib";
+import { Raylib } from "./artisan";
 import triangle from "./triangle";
 
 export default class mesh {
